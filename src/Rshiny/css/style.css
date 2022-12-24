@@ -1,0 +1,34 @@
+.main-sidebar {
+        font-family: "Georgia", Times, "Times New Roman", serif;
+        font-weight: bold;
+        font-size: 16px;
+}
+.header-sidebar {
+        font-family: "Georgia", Times, "Times New Roman", serif;
+        font-weight: bold;
+        font-size: 40px;
+}
+
+.skin-blue .main-header .logo {
+                                background-color: #f4b943;
+                                }
+
+
+.content-wrapper {
+  background-color: #fff;
+}
+                                
+#.main-sidebar {
+#  background-color: yellow;
+#}
+
+sidebar .sidebarmenu .active{
+  background-color: #39cccc;
+}
+
+#attr_box {
+    border: 3px solid grey;
+}
+#unit {
+    border: 4px double green;
+}
