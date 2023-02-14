@@ -9,33 +9,43 @@ server <- function(input, output, session) {
   ###############################################################
   
   observe({
-    updatePickerInput(session, inputId = "townPicker", choices = towns, selected = "Lowell")
+    updatePickerInput(session, inputId = "townPicker", choices = towns, selected = "Carlisle")
   })
   
   observe({
     updateCheckboxGroupInput(session, inputId = "housetypePicker", choices = housetypes, selected = housetypes, inline = TRUE)
   })
   
-  selected_rent <- reactive({
-    DATA$cat = gsub("_rent", "", DATA$cat)
-    DATA %>% filter(grepl("Br", cat)) %>% filter(town %in% !!input$townPicker) %>% dplyr::filter(cat %in% !!input$housetypePicker)
-    # rent_in_MA_2006_to_2022 %>% filter(town %in% !!input$townPicker) %>% filter(house_type %in% !!input$housetypePicker)
+  data_per_town <- reactive({
+    DATA %>% filter(town %in% !!input$townPicker)
   })
   
-  
-  ##############################
-  ##### House prices
+  selected_rent <- reactive({
+    # monthly rent
+    data_per_town() %>% filter(grepl("Br", cat)) %>% dplyr::filter(cat %in% !!input$housetypePicker)
+  })
   
   selected_price <- reactive( {
-    DATA %>% filter(cat == "house_price") %>% filter(town %in% !!input$townPicker)
+    data_per_town() %>% filter(cat == "single_family_house_price")
   })
   
   income_per_household_reactive <- reactive({
-    DATA %>% filter(town %in% !!input$townPicker) %>% filter(cat == "median_household_income")
+    data_per_town() %>% filter(cat == "median_household_income")
+  })
+  
+  selected_pop <- reactive( {
+    ##### Town population:
+    data_per_town() %>% filter(cat == "population")
+  })
+  
+  selected_index <- reactive( {
+    ##### Ratio between average house and average annual rent
+    selected_rent() %>% group_by(town, year) %>% dplyr::summarise(median = median(value)) %>% 
+      dplyr::inner_join(selected_price(), by=c('year', 'town')) %>% dplyr::mutate(index = value/(12*median))
   })
   
   output$income_per_household_reactive_ibox <- shinydashboard::renderInfoBox({
-    income = DATA %>% filter(town %in% !!input$townPicker) %>% filter(cat == "median_household_income")
+    income = data_per_town() %>% filter(cat == "median_household_income")
     shinydashboard::infoBox(
       "The median household income is ",
       # value = 12000,
@@ -46,7 +56,7 @@ server <- function(input, output, session) {
   })
   
   output$number_of_households_reactive_ibox <- shinydashboard::renderInfoBox({
-    income = DATA %>% filter(town %in% !!input$townPicker) %>% filter(cat == "number_of_households")
+    income = data_per_town() %>% filter(cat == "number_of_households")
     shinydashboard::infoBox(
       "Total Number of Households is ",
       value = income$value,
@@ -58,7 +68,7 @@ server <- function(input, output, session) {
   })
   
   output$per_capita_income_reactive_ibox <- shinydashboard::renderInfoBox({
-    income = DATA %>% filter(town %in% !!input$townPicker) %>% filter(cat == "per_capita_income")
+    income = data_per_town() %>% filter(cat == "per_capita_income")
     shinydashboard::infoBox(
       "Per capita income in 2019 is ",
       # value = 12000,
@@ -69,8 +79,7 @@ server <- function(input, output, session) {
   })
   
   output$pricePlot <- renderPlotly({
-    selected_price() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter",  
-                                 mode="markers+lines", symbols = c('circle','x','o'), 
+    selected_price() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", symbols = c('circle','x','o'), 
                                  text = ~paste(" town", town, "\nHouse price", value), hoverinfo=c("text"), 
                                  opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("In ", as.character(input$townPicker)),
                                                                                   xaxis = list(title = "Time, years"), yaxis = list(title = "House price, $"))
@@ -78,10 +87,6 @@ server <- function(input, output, session) {
   })
   
 
-  ##### Town population:
-  selected_pop <- reactive( {
-    DATA %>% filter(cat == "population")  %>% dplyr::filter(town %in% !!input$townPicker) 
-  })
   
   output$popPlot <- renderPlotly({
     selected_pop() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines")
@@ -93,14 +98,6 @@ server <- function(input, output, session) {
                                 mode="markers+lines", symbols = c('circle','x','o'), 
                                 text = ~paste(" town", town, "\nType", cat, "\nPrice", value), hoverinfo=c("text"), 
                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Rentals in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Price per month, $"))
-  })
-  
-  ##############################
-  ##### Ratio between average house and average annual rent
-  
-  selected_index <- reactive( {
-    selected_rent() %>% group_by(town, year) %>% dplyr::summarise(median = median(value)) %>% 
-      dplyr::inner_join(selected_price(), by=c('year', 'town')) %>% dplyr::mutate(index = value/(12*median))
   })
   
   output$indexPlot <- renderPlotly({
@@ -127,21 +124,40 @@ server <- function(input, output, session) {
   })
   
   observe({
-    updateSliderInput(session, inputId = "filtering_index_range", min = min(data$index))
+    updateSliderInput(session, inputId = "filtering_index_range", min = 10)
+  })
+  
+  observe({
+    updateSliderInput(session, inputId = "filtering_popolation_range", min = min_population)
+  })
+  
+  observe({
+    updateSliderInput(session, inputId = "filtering_price_range", min = 300000)
+  })
+  
+  observe({
+    updateCheckboxGroupInput(session, inputId = "time_year_filter", choices = years, selected = 2020, inline = TRUE)
   })
 
   
   data_selected <- eventReactive(input$Go2, {
-    selected = data %>% filter(index >= !!input$filtering_index_range[1] & index <= !!input$filtering_index_range[2]) 
-    selected = selected %>% filter(year %in% !!input$time_year_filter)
-    selected = selected %>% filter(county %in% !!input$county_filter)
-    selected = selected %>% filter(price >= !!input$filtering_price_range[1] & price <= !!input$filtering_price_range[2])
-    selected %>% filter(population_2019 >= !!input$filtering_popolation_range[1] & population_2019 <= !!input$filtering_popolation_range[2])
+
+    selected = DATA  %>% filter(county %in% !!input$county_filter)
+    selected_wide = selected %>% tidyr::pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value")
+    
+    selected_wide = selected_wide %>% filter(single_family_house_price >= !!input$filtering_price_range[1] & single_family_house_price <= !!input$filtering_price_range[2])
+    towns_with_selected_population = selected_wide %>% filter(year == 2019) %>% filter( population >= !!input$filtering_popolation_range[1] & population <= !!input$filtering_popolation_range[2]) %>% pull('town')
+    selected_wide = selected_wide %>% dplyr::filter(year %in% !!input$time_year_filter) %>% filter(town %in% towns_with_selected_population) 
+    # selected_wide = selected_wide %>% mutate(mean_annual_rent = 12*mean(!!input$housetypePicker2))
+    
+    selected_wide = selected_wide %>% mutate(mean_annual_rent = 12*mean(c(Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent )))
+    selected_wide = selected_wide %>% mutate(index = single_family_house_price/mean_annual_rent) %>% filter(index >= !!input$filtering_index_range[1] & index <= !!input$filtering_index_range[2]) 
+    selected_wide %>% dplyr::select(town, year, county, single_family_house_price,mean_annual_rent, index, Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent, everything())
   })
   
   output$filteredData <- renderDataTable({
-    data_selected() %>% arrange(index)
-  }, rownames = FALSE)
+    data_selected() %>% arrange(index)  }, extensions = c('Responsive'), 
+    options = list(responsive = TRUE), rownames = FALSE)
   
   
   ###############################################################

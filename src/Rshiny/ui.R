@@ -188,11 +188,11 @@ ui <- dashboardPage(
                     collapsed = FALSE,
                     status = status,
                     # options: https://rdrr.io/cran/shinyWidgets/man/pickerOptions.html
-                    shinyWidgets::pickerInput("townPicker", label = "Max three options", choices = towns, 
+                    shinyWidgets::pickerInput("townPicker", label = "List of all towns and cities in MA will be populated below", choices = towns, 
                                         selected = "Carlisle", 
-                                        multiple = TRUE, 
+                                        multiple = FALSE, 
                                         options = list(`selected-text-format`= "values", # count, static
-                                                        title = "Choose your town of interest", 
+                                                        title = "Choose one town of interest", 
                                                         `actions-box` = TRUE, 
                                                         "max-options" = 3, `multiple-separator` = " | ", 
                                                         "max-options-group" = 3, 
@@ -306,15 +306,27 @@ ui <- dashboardPage(
               collapsible = TRUE,
               collapsed = FALSE,
               status = status,
-              shiny::sliderInput(inputId = "filtering_price_range", label = "Select house price range:", min = min(data$price), max = max(data$price), step = 10000, value = c(300000, 500000)),
+              shiny::sliderInput(inputId = "filtering_price_range", 
+                                 label = "Select house price range:", 
+                                 min = min_house_price, max = max_house_price, 
+                                 step = 10000, value = c(300000, 500000)),
               
-              shiny::sliderInput(inputId = "filtering_index_range", label = "Select buyer index range:", min = 5, max= max(unique(data$index)), step = 1, value = c(10, 20)),
+     #         shinyWidgets::prettyCheckboxGroup("housetypePicker2", 
+    #                                            label = "How mean rent should be calculated:", 
+    #                                            inline = TRUE, 
+    #                                            status = status,
+    #                                            choices = housetypes, 
+    #                                            selected = housetypes),
+              
+              shiny::sliderInput(inputId = "filtering_index_range", 
+                                 label = "Select buyer index range:", 
+                                 min = 5, max = 50, step = 1, value = c(10, 20)),
               
               shinyWidgets::prettyCheckboxGroup("time_year_filter", 
                                                 label = "Select year", 
                                                 inline = TRUE, 
                                                 status = status,
-                                                choices = sort(unique(data$year)), 
+                                                choices = years, 
                                                 selected = 2021)
               
               ),
@@ -324,7 +336,9 @@ ui <- dashboardPage(
               collapsible = TRUE,
               collapsed = FALSE,
               status = status,
-              shiny::sliderInput(inputId = "filtering_popolation_range", label = "Select population range ( from 2019 ) exluding Boston:", min = 100, max = 200000, value = c(5000, 30000)),
+              shiny::sliderInput(inputId = "filtering_popolation_range", 
+                                 label = "Select population range based on 2019 (Boston is excluded):", 
+                                 min = min_population, max = max_population, value = c(5000, 30000)),
               
               shinyWidgets::prettyCheckboxGroup("county_filter", 
                                                 label = "Select county",
@@ -333,6 +347,7 @@ ui <- dashboardPage(
                                                 choices = counties, 
                                                 selected = counties),
               
+              br(),
               shinyWidgets::actionBttn(inputId = "Go2", label = "GET LIST", 
                                        color = "primary", style = "bordered",
                                        icon = icon("pen"))

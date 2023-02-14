@@ -2,7 +2,6 @@ library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(bs4Dash)
-library(readr)
 library(stringr)
 library(dplyr, warn.conflicts = FALSE)
 library(plotly, warn.conflicts = FALSE)
@@ -15,31 +14,17 @@ status = "primary"  # teal: #39cccc.
 # skin = "lime"
 
 DATA = qs::qread("./data/merged_data.qs")
+DATA$value = as.integer(DATA$value)
 vars = sort(unique(DATA$cat))
+counties = sort(unique(DATA$county))
+min_house_price = DATA %>% filter(cat == "single_family_house_price") %>% pull('value') %>% min()
+max_house_price = DATA %>% filter(cat == "single_family_house_price") %>% pull('value') %>% max()
 
-rent_in_MA_2006_to_2022 <- readRDS("./data/rent_in_MA_2006_to_2022.rds")
-populationMA <- readRDS("./data/populationMA.rds")
-counties = sort(unique(populationMA$county))
-
-populationMA_2019 = populationMA %>% filter(year == 2019) %>% dplyr::select(-year) %>% rename("population_2019" = "population")
-house_prices_MA <- readRDS("./data/house_prices_MA.rds")
-
-# colnames(populationMA) <- c("town", "year", "population", "category")
+min_population = DATA %>% filter(cat == "population") %>% pull('value') %>% min()
+max_population = 185428 # without Boston
 
 towns = sort(unique(DATA$town))
-housetypes = unique(rent_in_MA_2006_to_2022$house_type)
+housetypes = c("Br0_rent", "Br1_rent", "Br2_rent", "Br3_rent", "Br4_rent")
+years = c(2014, 2015, 2018, 2019, 2020, 2021)
 
-# length(unique(house_prices_MA$town))
-# [1] 155
-# length(unique(populationMA$town))
-# [1] 351
-# length(unique(rent_in_MA_2006_to_2022$town))
-# [1] 362
-
-rental.collapsed = rent_in_MA_2006_to_2022 %>% group_by(town, year) %>% summarise(mean_rent = mean(value), .groups = "drop")
-data = house_prices_MA %>% inner_join(rental.collapsed, by = c("year", "town"))
-data = data %>% mutate(index = price/(12*mean_rent))
-data = data %>% inner_join(populationMA_2019, by="town")
-data$index = round(data$index, 3)
-data_merged = qs::qread("./data/merged_data.qs")
 
