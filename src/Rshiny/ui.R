@@ -199,10 +199,6 @@ ui <- dashboardPage(
                                                         `live-search`=TRUE,
                                                         "max-options-text" = "No more!")),
                     br()
-             #       shinyWidgets::actionBttn(inputId = "Go", label = "GET DATA", 
-            #                               color = "primary", style = "bordered",
-            #                               icon = icon("pen"))
-                       
                  ),
               box(width = 6, height = 150,
                       collapsible = TRUE,
@@ -215,10 +211,9 @@ ui <- dashboardPage(
                                                     status = status,
                                                     choices = housetypes, 
                                                     selected = housetypes) #  icon = icon("dev")
-                      
-                  
                       )
         ),
+        
         fluidRow(
             shinydashboard::infoBoxOutput("income_per_household_reactive_ibox"),
             shinydashboard::infoBoxOutput("number_of_households_reactive_ibox"),
@@ -283,8 +278,10 @@ ui <- dashboardPage(
                  width = 12
         ),
         fluidRow(
-          shinyWidgets::pickerInput("varX", label = "Choose X variable", choices = vars, selected = vars[1], multiple = FALSE ),
-          shinyWidgets::pickerInput("varY", label = "Choose Y variable", choices = vars, selected = vars[2], multiple = FALSE )
+          shinyWidgets::pickerInput("varX", label = "Choose X variable", 
+                                    choices = vars, selected = vars[1], multiple = FALSE),
+          shinyWidgets::pickerInput("varY", label = "Choose Y variable", 
+                                    choices = vars, selected = vars[2], multiple = FALSE )
         ),
         
         fluidRow(
@@ -311,23 +308,19 @@ ui <- dashboardPage(
                                  min = min_house_price, max = max_house_price, 
                                  step = 10000, value = c(300000, 500000)),
               
-     #         shinyWidgets::prettyCheckboxGroup("housetypePicker2", 
-    #                                            label = "How mean rent should be calculated:", 
-    #                                            inline = TRUE, 
-    #                                            status = status,
-    #                                            choices = housetypes, 
-    #                                            selected = housetypes),
-              
               shiny::sliderInput(inputId = "filtering_index_range", 
-                                 label = "Select buyer index range:", 
-                                 min = 5, max = 50, step = 1, value = c(10, 20)),
+                                  label = "Select buyer index range:", 
+                                  min = 5, max = 50, step = 1, 
+                                  value = c(10, 20)),
               
-              shinyWidgets::prettyCheckboxGroup("time_year_filter", 
-                                                label = "Select year", 
-                                                inline = TRUE, 
-                                                status = status,
-                                                choices = years, 
-                                                selected = 2021)
+              
+              shinyWidgets::awesomeRadio("time_year_filter", 
+                                  label = "Select year", 
+                                  inline = TRUE, 
+                                  status = status,
+                                  choices = years,
+                                  checkbox = TRUE,
+                                  selected = 2021)
               
               ),
           
@@ -376,6 +369,14 @@ ui <- dashboardPage(
           Please contact the application developers if you have any questions
           about the application or encounter any errors. Please also include
           screenshots of the error(s) you wish to report."
+        ),
+        
+        box(
+          title = "Source code",
+          width = 12,
+          collapsible = FALSE,
+          status = status,
+          "Source code for the app, code for data retrival and cleanup could be found here: https://github.com/ikalatskaya/massachusetts_rental_property.git"
         ),
         
         ##### Contact information boxes ----

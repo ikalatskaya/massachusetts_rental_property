@@ -136,7 +136,7 @@ server <- function(input, output, session) {
   })
   
   observe({
-    updateCheckboxGroupInput(session, inputId = "time_year_filter", choices = years, selected = 2020, inline = TRUE)
+    updateAwesomeRadio(session, inputId = "time_year_filter", choices = years, selected = 2021, inline = TRUE)
   })
 
   
@@ -148,9 +148,7 @@ server <- function(input, output, session) {
     selected_wide = selected_wide %>% filter(single_family_house_price >= !!input$filtering_price_range[1] & single_family_house_price <= !!input$filtering_price_range[2])
     towns_with_selected_population = selected_wide %>% filter(year == 2019) %>% filter( population >= !!input$filtering_popolation_range[1] & population <= !!input$filtering_popolation_range[2]) %>% pull('town')
     selected_wide = selected_wide %>% dplyr::filter(year %in% !!input$time_year_filter) %>% filter(town %in% towns_with_selected_population) 
-    # selected_wide = selected_wide %>% mutate(mean_annual_rent = 12*mean(!!input$housetypePicker2))
-    
-    selected_wide = selected_wide %>% mutate(mean_annual_rent = 12*mean(c(Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent )))
+    selected_wide = selected_wide %>% filter_at(vars(Br0_rent), all_vars(!is.na(.))) %>% mutate(mean_annual_rent = 12*mean(c(Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent )))
     selected_wide = selected_wide %>% mutate(index = single_family_house_price/mean_annual_rent) %>% filter(index >= !!input$filtering_index_range[1] & index <= !!input$filtering_index_range[2]) 
     selected_wide %>% dplyr::select(town, year, county, single_family_house_price,mean_annual_rent, index, Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent, everything())
   })
