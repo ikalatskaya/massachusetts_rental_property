@@ -81,7 +81,7 @@ server <- function(input, output, session) {
   output$pricePlot <- renderPlotly({
     selected_price() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", symbols = c('circle','x','o'), 
                                  text = ~paste(" town", town, "\nHouse price", value), hoverinfo=c("text"), 
-                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("In ", as.character(input$townPicker)),
+                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Property cost In ", as.character(input$townPicker)),
                                                                                   xaxis = list(title = "Time, years"), yaxis = list(title = "House price, $"))
     
   })
@@ -89,7 +89,7 @@ server <- function(input, output, session) {
 
   
   output$popPlot <- renderPlotly({
-    selected_pop() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines")
+    selected_pop() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines") %>% layout(title = paste0("Population of ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Number of residents"))
   })
   
   ##### Rent plot
@@ -101,7 +101,7 @@ server <- function(input, output, session) {
   })
   
   output$indexPlot <- renderPlotly({
-    selected_index() %>% plot_ly(x = ~year, y= ~index, color = ~town, type="scatter", mode="markers+lines")
+    selected_index() %>% plot_ly(x = ~year, y= ~index, color = ~town, type="scatter", mode="markers+lines") %>% layout(title = paste0("Buyer index in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Index"))
   })
   
   ################################

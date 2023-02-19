@@ -359,27 +359,6 @@ ui <- dashboardPage(
         tabName = "app_help",
         
         ##### Application help summary box ----
-        box(
-          title = "Application help",
-          width = 12,
-          collapsible = FALSE,
-          status = status,
-          "
-          This app was created by Irina Kalatskaya using the R programming language and shiny R Web framework.
-          Please contact the application developers if you have any questions
-          about the application or encounter any errors. Please also include
-          screenshots of the error(s) you wish to report."
-        ),
-        
-        box(
-          title = "Source code",
-          width = 12,
-          collapsible = FALSE,
-          status = status,
-          "Source code for the app, code for data retrival and cleanup could be found here: https://github.com/ikalatskaya/massachusetts_rental_property.git"
-        ),
-        
-        ##### Contact information boxes ----
         fluidRow(
           bs4Card(
             status = status,
@@ -388,16 +367,52 @@ ui <- dashboardPage(
             collapsible = FALSE,
             boxProfile(
               image = NULL,
-              title = "Irina Kalatskaya, PhD",
+              title = "Developer: Irina Kalatskaya, PhD",
+              
               subtitle = HTML(
-                "Data Scientist, Bioinformatician and Computational Scientist <br/>
-                https://www.linkedin.com/in/irina-kalatskaya/<br/>
-                <br/>
-                 ikalats at gmail.com"),
+                "Data Scientist, Bioinformatician and Computational Scientist <br/>",
+              ),
+              boxProfileItem(
+                title = "LinkedIn profile",
+                description = "https://www.linkedin.com/in/irina-kalatskaya/"
+              ),
+              boxProfileItem(
+                title = "E-mail",
+                description = "ikalats at gmail.com"
+              ),
               bordered = TRUE
             )
           )
-        ) # end of fluidRow
+        ), # end of fluidRow
+        
+        box(
+          title = "Application help",
+          width = 12,
+          collapsible = FALSE,
+          status = status,
+          " This app was created using the R programming language and Shiny R Web framework.
+          Please contact the application developers if you have any questions
+          about the application or encounter any errors. Please also include
+          screenshots of the error(s) you wish to report."
+        ),
+        
+        box(
+          title = "Data download",
+          width = 12,
+          collapsible = FALSE,
+          status = status,
+          "A copy of the consoldated and clean data could be downloaded from ", tags$a(href = "https://www.kaggle.com/datasets/ikalats/massachusetts-house-pricing", "my Kaggle account.")
+        ),
+        
+        box(
+          title = "Source code",
+          width = 12,
+          collapsible = FALSE,
+          status = status,
+          "Source code for the app, code for data retrival and cleanup could be found ",
+          tags$a(href="https://github.com/ikalatskaya/massachusetts_rental_property.git", " in my GitHub account.")
+        )
+        
         
       )
     )
