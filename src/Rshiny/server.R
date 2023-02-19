@@ -80,8 +80,7 @@ server <- function(input, output, session) {
     income = data_per_town() %>% filter(cat == "per_capita_income")
     shinydashboard::infoBox(
       "Per capita income in 2019 is ",
-      # value = 12000,
-      value = income$value,
+      value = paste(income$value, 12000, sep="\t"),
       icon = shiny::icon("diagram-project"),
       color = "green", href = NULL, fill = FALSE
     )
@@ -149,17 +148,32 @@ server <- function(input, output, session) {
   })
 
   
-  data_selected <- eventReactive(input$Go2, {
 
-    selected = DATA  %>% filter(county %in% !!input$county_filter)
-    selected_wide = selected %>% tidyr::pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value")
+  ## # https://stackoverflow.com/questions/33401788/dplyr-using-mutate-like-rowmeans
+  data_selected <- eventReactive(input$Go2, {
     
+    # from initial df parse towns in the specific counties
+    selected = DATA  %>% filter(county %in% !!input$county_filter)
+    # calculate mean rental prices per town per year from slim_format
+    mean_rent_df = selected %>% filter(cat %in% c("Br0_rent", "Br1_rent", "Br2_rent", "Br3_rent", "Br4_rent")) %>% na.omit() %>% dplyr::group_by(town, year) %>% dplyr::summarise(mean_annual_rent = 12*mean(value), .groups = "drop")
+    # convert slim into wide format by town, year and county and join mean_rent_df
+    selected_wide = selected %>% tidyr::pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value") %>% dplyr::left_join(mean_rent_df, by=c("town", "year"))
+    # parse by house price range
     selected_wide = selected_wide %>% filter(single_family_home_price >= !!input$filtering_price_range[1] & single_family_home_price <= !!input$filtering_price_range[2])
+    
+    # from initial collection select towns with specific population and pull them into vector
     towns_with_selected_population = selected_wide %>% filter(year == 2019) %>% filter( population >= !!input$filtering_popolation_range[1] & population <= !!input$filtering_popolation_range[2]) %>% pull('town')
-    selected_wide = selected_wide %>% dplyr::filter(year %in% !!input$time_year_filter) %>% filter(town %in% towns_with_selected_population) 
-    selected_wide = selected_wide %>% filter_at(vars(Br0_rent), all_vars(!is.na(.))) %>% mutate(mean_annual_rent = 12*mean(c(Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent )))
-    selected_wide = selected_wide %>% mutate(index = single_family_home_price/mean_annual_rent) %>% filter(index >= !!input$filtering_index_range[1] & index <= !!input$filtering_index_range[2]) 
-    selected_wide %>% dplyr::select(town, year, county, single_family_home_price, mean_annual_rent, index, Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent, everything())
+    # selected towns only with specified population
+    selected_wide = selected_wide %>% filter(town %in% towns_with_selected_population)  
+    # select specific year of data collection
+    selected_wide = selected_wide %>% dplyr::filter(year %in% !!input$time_year_filter)
+    selected_wide$mean_annual_rent = as.double(selected_wide$mean_annual_rent)
+    # selected_wide = selected_wide %>% filter_at(vars(Br0_rent), all_vars(!is.na(.)))  %>% dplyr::mutate(mean_annual_rent = 12*mean(c(Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent)))
+    
+    # calculate index and parse by index
+    selected_wide = selected_wide %>% dplyr::mutate(index = single_family_home_price/mean_annual_rent) %>% filter(index >= !!input$filtering_index_range[1] & index <= !!input$filtering_index_range[2]) 
+    selected_wide %>% dplyr::select(town, year, county, index, single_family_home_price, mean_annual_rent, Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent, everything())
+    
   })
   
   output$filteredData <- renderDataTable({

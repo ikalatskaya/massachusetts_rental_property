@@ -2,14 +2,14 @@
 title: "Data retrival and wrangling"
 author: "Irina Kalatskaya"
 date: "`r Sys.Date()`"
+always_allow_html: true
 output: 
-  html_document:
+  md_document:
     toc: true
-    theme: united
+   
 ---
 
 ```{r setup, include=FALSE}
-
 
 library(rvest)
 library(stringr)
@@ -17,8 +17,6 @@ library(modelr)
 library(dplyr, warn.conflicts = FALSE)
 library(readr)
 library(tidyverse)
-
-# setwd("/Users/parentaccount-yaaaaay/Library/CloudStorage/OneDrive-Personal/R/Towns/src/")
 
 ```
 
