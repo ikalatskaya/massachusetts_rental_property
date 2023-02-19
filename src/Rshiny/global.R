@@ -13,12 +13,13 @@ skin_colour = "primary"
 status = "primary"  # teal: #39cccc.
 # skin = "lime"
 
-DATA = qs::qread("./data/merged_data.qs")
-DATA$value = as.integer(DATA$value)
+DATA_FULL = qs::qread("./data/merged_data.qs")
+DATA = DATA_FULL %>% filter(!cat %in% c("total_school_budget", "average_teacher_salary", "number_of_school_fte"))
+DATA$value = as.double(DATA$value)
 vars = sort(unique(DATA$cat))
 counties = sort(unique(DATA$county))
-min_house_price = DATA %>% filter(cat == "single_family_house_price") %>% pull('value') %>% min()
-max_house_price = DATA %>% filter(cat == "single_family_house_price") %>% pull('value') %>% max()
+min_house_price = DATA %>% filter(cat == "single_family_home_price") %>% pull('value') %>% min()
+max_house_price = DATA %>% filter(cat == "single_family_home_price") %>% pull('value') %>% max()
 
 min_population = DATA %>% filter(cat == "population") %>% pull('value') %>% min()
 max_population = 185428 # without Boston

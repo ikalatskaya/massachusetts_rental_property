@@ -26,7 +26,7 @@ server <- function(input, output, session) {
   })
   
   selected_price <- reactive( {
-    data_per_town() %>% filter(cat == "single_family_house_price")
+    data_per_town() %>% filter(cat == "single_family_home_price")
   })
   
   income_per_household_reactive <- reactive({
@@ -40,7 +40,7 @@ server <- function(input, output, session) {
   
   selected_index <- reactive( {
     ##### Ratio between average house and average annual rent
-    selected_rent() %>% group_by(town, year) %>% dplyr::summarise(median = median(value)) %>% 
+    selected_rent() %>% group_by(town, year) %>% dplyr::summarise(median = median(value), .groups = "drop") %>% 
       dplyr::inner_join(selected_price(), by=c('year', 'town')) %>% dplyr::mutate(index = value/(12*median))
   })
   
@@ -55,7 +55,7 @@ server <- function(input, output, session) {
   })
   
   output$percent_of_homeowners_reactive_ibox <- shinydashboard::renderInfoBox({
-    home_owner = data_per_town() %>% filter(cat == "percent_of_homeownder")
+    home_owner = data_per_town() %>% filter(cat == "percent_of_homeowners")
     shinydashboard::infoBox(
       "The percent of homeowners in 2011 was ",
       value = home_owner$value,
@@ -88,9 +88,9 @@ server <- function(input, output, session) {
   })
   
   output$pricePlot <- renderPlotly({
-    selected_price() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", symbols = c('circle','x','o'), 
+    selected_price() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", symbols = c('x'), marker = list(size = 10), colors = c("blue"),
                                  text = ~paste(" town", town, "\nHouse price", value), hoverinfo=c("text"), 
-                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Property cost In ", as.character(input$townPicker)),
+                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Average property cost in ", as.character(input$townPicker)),
                                                                                   xaxis = list(title = "Time, years"), yaxis = list(title = "House price, $"))
     
   })
@@ -98,7 +98,7 @@ server <- function(input, output, session) {
 
   
   output$popPlot <- renderPlotly({
-    selected_pop() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines") %>% layout(title = paste0("Population of ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Number of residents"))
+    selected_pop() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", marker = list(size = 10), colors = c("green")) %>% layout(title = paste0("Population of ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Number of residents"))
   })
   
   ##### Rent plot
@@ -110,7 +110,7 @@ server <- function(input, output, session) {
   })
   
   output$indexPlot <- renderPlotly({
-    selected_index() %>% plot_ly(x = ~year, y= ~index, color = ~town, type="scatter", mode="markers+lines") %>% layout(title = paste0("Buyer index in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Index"))
+    selected_index() %>% plot_ly(x = ~year, y= ~index, color = ~town, type="scatter", marker = list(size = 12), mode="markers+lines") %>% layout(title = paste0("Buyer index in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Index"))
   })
   
   ################################
@@ -154,12 +154,12 @@ server <- function(input, output, session) {
     selected = DATA  %>% filter(county %in% !!input$county_filter)
     selected_wide = selected %>% tidyr::pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value")
     
-    selected_wide = selected_wide %>% filter(single_family_house_price >= !!input$filtering_price_range[1] & single_family_house_price <= !!input$filtering_price_range[2])
+    selected_wide = selected_wide %>% filter(single_family_home_price >= !!input$filtering_price_range[1] & single_family_home_price <= !!input$filtering_price_range[2])
     towns_with_selected_population = selected_wide %>% filter(year == 2019) %>% filter( population >= !!input$filtering_popolation_range[1] & population <= !!input$filtering_popolation_range[2]) %>% pull('town')
     selected_wide = selected_wide %>% dplyr::filter(year %in% !!input$time_year_filter) %>% filter(town %in% towns_with_selected_population) 
     selected_wide = selected_wide %>% filter_at(vars(Br0_rent), all_vars(!is.na(.))) %>% mutate(mean_annual_rent = 12*mean(c(Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent )))
-    selected_wide = selected_wide %>% mutate(index = single_family_house_price/mean_annual_rent) %>% filter(index >= !!input$filtering_index_range[1] & index <= !!input$filtering_index_range[2]) 
-    selected_wide %>% dplyr::select(town, year, county, single_family_house_price,mean_annual_rent, index, Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent, everything())
+    selected_wide = selected_wide %>% mutate(index = single_family_home_price/mean_annual_rent) %>% filter(index >= !!input$filtering_index_range[1] & index <= !!input$filtering_index_range[2]) 
+    selected_wide %>% dplyr::select(town, year, county, single_family_home_price, mean_annual_rent, index, Br0_rent, Br1_rent,  Br2_rent, Br3_rent, Br4_rent, everything())
   })
   
   output$filteredData <- renderDataTable({
