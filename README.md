@@ -18,6 +18,10 @@ https://minijen.shinyapps.io/Rental_property_in_MA/
 
 Funnel is a pipe that is wide at the top and narrow at the bottom, usualy used for guiding liquid or powder into a small opening. I used this term to describe an opportunity to select small number of MA towns out of ~350 in total using user's attributes like average property price range, population, etc. 
 
-In the example below, we wanted to see a list of town in Middlesex county (close to Boston) with buyer index between 10 and 16, population higher than 5,000 but lower than 150,000 and price below $800,000 in 2020.
+In the example below, we wanted to see a list of town in Middlesex county (close to Boston!) with buyer index between 10 and 20, population under 30,000 and price below $500,000.
 
-![Funnel_screenshot](https://user-images.githubusercontent.com/20693710/219905099-4874b35a-0828-4d3b-ba02-446a4e24b8ae.png)
+
+<img width="1438" alt="Screenshot 2023-02-18 at 10 09 52 PM" src="https://user-images.githubusercontent.com/20693710/219910227-1623d230-138b-48bf-8a96-07956ccfba21.png">
+
+
+Ayer, Shirley, Pepperell and Maynard are getting prioritized. 
