@@ -1,0 +1,222 @@
+---
+title: "Data retrival and wrangling"
+author: "Irina Kalatskaya"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    theme: united
+---
+
+```{r setup, include=FALSE}
+
+
+library(rvest)
+library(stringr)
+library(modelr)
+library(dplyr, warn.conflicts = FALSE)
+library(readr)
+library(tidyverse)
+
+# setwd("/Users/parentaccount-yaaaaay/Library/CloudStorage/OneDrive-Personal/R/Towns/src/")
+
+```
+
+<br/>
+
+## House rent price in MA
+
+The data was scraped from https://www.rentdata.org/states/massachusetts/.
+
+```{r rent, warning=FALSE}
+
+rentMA = tibble()
+years = seq(from = 2006, to = 2022)
+
+for(year in years) {
+  
+  url = paste0('https://www.rentdata.org/states/massachusetts/', year)
+  print(url)
+  #Reading the HTML code from the website
+  webpage <- read_html(url)
+  df = webpage %>% html_nodes("tr") %>% html_text()
+  df = df[-c(1:5)]
+  df = sub("\nMetro\n", "", df)
+  df = sub("\n\n", "\n", df)
+  data = do.call(rbind.data.frame, strsplit(df, "\n"))
+  colnames(data) <- c("town", "Br0", "Br1", "Br2", "Br3", "Br4", "remove", "double")
+  data = data %>% dplyr::select(-remove, -double)
+  
+  data$year = year
+  if(dim(rentMA)[1] == 0) {
+    rentMA <- data
+  }
+  else {
+    rentMA <- rbind(rentMA, data)
+  }
+  
+}
+
+rentMA$Br0 = parse_number(rentMA$Br0) # parse number from string
+rentMA$Br1 = parse_number(rentMA$Br1)
+rentMA$Br2 = parse_number(rentMA$Br2)
+rentMA$Br3 = parse_number(rentMA$Br3)
+rentMA$Br4 = parse_number(rentMA$Br4)
+
+rentMA = rentMA %>% mutate(town = stringr::str_replace(town, " city", "")) %>% mutate(town = str_trim(town, side="right"))
+
+rentMA = rentMA %>% mutate(town = stringr::str_replace(town, "Barnstable Town", "Barnstable"))
+rentMA = rentMA %>% mutate(town = stringr::str_replace(town, "Free Town", "Freetown"))
+rentMA = rentMA %>% mutate(town = stringr::str_replace(town, "Province town", "Provincetown"))
+rentMA = rentMA %>% mutate(town = stringr::str_replace(town, "Belcher town", "Belchertown"))
+
+
+# url <- 'https://www.bostonmagazine.com/property/single-family-home-price-chart-2021/'
+
+rentMA$town <- sub(" city|Town", "", rentMA$town, ignore.case = T)
+
+rent_in_MA_2006_to_2022 = rentMA %>% tidyr::pivot_longer(cols = c(Br0, Br1, Br2, Br3, Br4), names_to = "house_type")
+
+rent_in_MA_2006_to_2022$town = str_remove_all( rent_in_MA_2006_to_2022$town, " ")
+
+write_rds(rent_in_MA_2006_to_2022, file = "data/rent_in_MA_2006_to_2022.rds")
+
+DT::datatable(rent_in_MA_2006_to_2022, rownames = F)
+
+```
+
+
+<br/>
+
+## Download population data
+
+from https://donahue.umass.edu/documents/UMDI_V2021_MCD_Population_Estimates_Table_2022.07.02.xlsx
+
+
+```{r population}
+
+population = readxl::read_excel("data/UMDI_Appendix_A_MA_Subcounty_Pop_2010-2019.xlsx", sheet = 1, skip = 2 )
+population = population %>% dplyr::select(1:14) %>% dplyr::select(-Census, -'Estimates Base')
+colnames(population) <- c("town", "county", 2010:2019)
+population.df =  population %>% tidyr::pivot_longer(!c("town", "county"), names_to = "year", values_to = "value")
+population.df$year = as.integer(population.df$year)
+colnames(population.df) <- c("town", "county", "year", "population")
+write_rds(population.df, file = "data/populationMA.rds")
+DT::datatable(population.df, rownames = F)
+
+```
+<br/>
+
+## Teacher salary and school budget in MA school districts
+
+Resource: https://profiles.doe.mass.edu/statereport/teachersalaries.aspx
+The data is hard to scrape. It was copied/pasted from the resrouce above.
+
+
+
+```{r teachers_salary}
+
+salary = read_delim("data/teacher_salary_2019_2020.txt")
+salary$total_budget = parse_number(salary$total_budget)
+salary$average_salary = parse_number(salary$average_salary)
+write_rds(salary, file = "data/teacher_salary_in_MA_2019.rds")
+DT::datatable(salary, rownames = F)
+
+```
+
+
+<br/>
+
+## Home owner ratio
+
+Ratio of the home owner in the specific town is a potentially important factor for rental property. If this ratio is too high, maybe there is neither market or demand for rental seekers.
+The data was scraped from http://archive.boston.com/yourtown/specials/snapshot/snapshot_percent_owner_occupied_housing/.
+
+```{r}
+
+
+
+url = 'http://archive.boston.com/yourtown/specials/snapshot/snapshot_percent_owner_occupied_housing/'
+print(url)
+#Reading the HTML code from the website
+webpage <- read_html(url)
+df = webpage %>% html_nodes("tr") %>% html_text()
+df = df[-c(1:1)]
+df = sub("\nMetro\n", "", df)
+df = sub("\n\n", "\n", df)
+data = do.call(rbind.data.frame, strsplit(df, "\n"))
+
+colnames(data) <- "temp"
+
+percent_of_homeowner = data %>% separate(temp, into = c("town", "num"), 
+           sep = "(?<=[A-Za-z])(?=[0-9])") %>% separate(num, sep="%", into=c("value", "rank_based_on_homeowner"))
+
+percent_of_homeowner$year = "2011"
+percent_of_homeowner = percent_of_homeowner %>% dplyr::select(-rank_based_on_homeowner)
+percent_of_homeowner$cat = "percent_of_homeowners"
+percent_of_homeowner = percent_of_homeowner %>% dplyr::select(town, year, value, cat)
+write_rds(percent_of_homeowner, file = "data/percent_of_homeowner.rds")
+
+DT::datatable(percent_of_homeowner, rownames = F)
+
+```
+
+<br/>
+
+
+## House prices in MA
+
+Source: https://www.bostonmagazine.com/property/single-family-home-price-chart-2020/
+
+
+```{r}
+
+
+##########################################################
+################ 2020 + 2016
+##########################################################
+url = "https://www.bostonmagazine.com/property/single-family-home-price-chart-2020/"
+webpage <- read_html(url)
+df = webpage %>% html_nodes("tr") %>% html_text()
+df = df[-c(1:1)]
+# df = sub("\n\n", "\n", df)
+house_prices_ma = do.call(rbind.data.frame, strsplit(df, "\\$"))
+colnames(house_prices_ma) <- c("town", "2020", "2019", "2018", "2015", "2014", "2010", "temp")
+house_prices_ma = house_prices_ma  %>% dplyr::select(-temp, -`2010`)
+# house_prices_ma %>% select(`2010`) %>% mutate(tem = str_sub(`2010`, start = 1, end = 7))
+house_prices_slim = house_prices_ma %>% pivot_longer(!c("town"), names_to = "year", values_to = "value")
+house_prices_slim$year = parse_integer(house_prices_slim$year)
+house_prices_slim$value = parse_number(house_prices_slim$value)
+
+##########################################################
+################ 2021 + 2016 #############################
+##########################################################
+url = "https://www.bostonmagazine.com/property/single-family-home-price-chart-2021/"
+webpage <- read_html(url)
+df = webpage %>% html_nodes("tr") %>% html_text()
+df = df[-c(1:1)]
+house_prices_ma_2016_2021 = do.call(rbind.data.frame, strsplit(df, "\\$"))
+colnames(house_prices_ma_2016_2021) <- c("town", "2021", "2020", "2016", "2011")
+head(house_prices_ma_2016_2021)
+house_prices_ma_2016_2021 = house_prices_ma_2016_2021 %>% dplyr::select(town, `2021`, `2016`)
+house_prices_ma_2016_2021 = house_prices_ma_2016_2021 %>% pivot_longer(!c("town"), names_to = "year", values_to = "value")
+
+house_prices_ma_2016_2021$year = parse_integer(house_prices_ma_2016_2021$year)
+house_prices_ma_2016_2021$value = parse_number(house_prices_ma_2016_2021$value)
+
+##########################################################
+############### Merging #################################
+##########################################################
+
+house_prices_slim = rbind(house_prices_slim, house_prices_ma_2016_2021)
+house_prices_slim = house_prices_slim %>% arrange(-year)
+house_prices_slim$category = "single_family_home_price"
+
+write_rds(house_prices_slim, file = "data/house_prices_MA.rds")
+
+DT::datatable(house_prices_slim, rownames = F)
+
+
+
+```
+

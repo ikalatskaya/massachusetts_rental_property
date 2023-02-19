@@ -52,6 +52,12 @@ ui <- dashboardPage(
                selected = FALSE
       ),
       
+#     menuItem("Linear regression",
+#               tabName = "lm",
+#               icon = icon("image"),
+#               selected = FALSE
+#      ),
+      
       menuItem("Correlation",
                tabName = "correlation",
                icon = icon("image"),
@@ -215,9 +221,10 @@ ui <- dashboardPage(
         ),
         
         fluidRow(
-            shinydashboard::infoBoxOutput("income_per_household_reactive_ibox"),
-            shinydashboard::infoBoxOutput("number_of_households_reactive_ibox"),
-            shinydashboard::infoBoxOutput("per_capita_income_reactive_ibox")
+            shinydashboard::infoBoxOutput("income_per_household_reactive_ibox", width = 3),
+            shinydashboard::infoBoxOutput("number_of_households_reactive_ibox", width = 3),
+            shinydashboard::infoBoxOutput("per_capita_income_reactive_ibox", width = 3),
+            shinydashboard::infoBoxOutput("percent_of_homeowners_reactive_ibox", width = 3)
           
         ),
       

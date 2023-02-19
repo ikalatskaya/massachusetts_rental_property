@@ -48,8 +48,17 @@ server <- function(input, output, session) {
     income = data_per_town() %>% filter(cat == "median_household_income")
     shinydashboard::infoBox(
       "The median household income is ",
-      # value = 12000,
-      value = income$value,
+      value =  income$value,
+      icon = shiny::icon("money-bill"),
+      color = "navy", href = NULL, fill = FALSE
+    )
+  })
+  
+  output$percent_of_homeowners_reactive_ibox <- shinydashboard::renderInfoBox({
+    home_owner = data_per_town() %>% filter(cat == "percent_of_homeownder")
+    shinydashboard::infoBox(
+      "The percent of homeowners in 2011 was ",
+      value = home_owner$value,
       icon = shiny::icon("money-bill"),
       color = "navy", href = NULL, fill = FALSE
     )
