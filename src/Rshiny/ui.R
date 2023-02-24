@@ -52,25 +52,23 @@ ui <- dashboardPage(
                selected = FALSE
       ),
       
-#     menuItem("Linear regression",
-#               tabName = "lm",
-#               icon = icon("image"),
-#               selected = FALSE
-#      ),
-      
-      menuItem("Correlation",
-               tabName = "correlation",
+     menuItem("County data",
+               tabName = "county",
                icon = icon("image"),
                selected = FALSE
       ),
+      
+#      menuItem("Correlation",
+#               tabName = "correlation",
+#               icon = icon("image"),
+#               selected = FALSE
+#      ),
       
       menuItem("Funnel",
                tabName = "filtering",
                icon = icon("filter"),
                selected = FALSE
       )
-      
-      
     )
   ),
   
@@ -161,11 +159,11 @@ ui <- dashboardPage(
                      
                      timelineLabel("Calculations", color = "navy"),
                      timelineItem(
-                       title = "Mean rental price",
+                       title = "Annutal average rental price",
                        icon = icon("info"),
                        color = "secondary",
                        HTML(
-                         "Mean rental price was calculated per town across studio, one-, two-, three- and four-bedroom houses if available."
+                         "Annual average rental prices were calculated as a mean of studio, one-, two-, three- and four-bedroom houses in each town per each year if data was available."
                        ),
                        time = "calculation"
                      ),
@@ -176,7 +174,7 @@ ui <- dashboardPage(
                        HTML(
                          "Buyer index is a ratio between a house price in the specific town and 12-month mean rental. Usually, buyer index between 11 and 17 shows a good balance between house price and income. "
                        ),
-                       time = "calcution"
+                       time = "calculation"
                      )
                   )
           )
@@ -273,6 +271,51 @@ ui <- dashboardPage(
         )
       )
       ),
+      
+      
+      ##################################
+      #### ---COUNTY tab ----
+      ###################################
+      tabItem(tabName = "county",
+              fluidRow(title = "", width = 12),
+              fluidRow(
+                shinyWidgets::pickerInput("selected_county", label = "Choose counties for comparison", 
+                                          choices = counties, selected = counties, multiple = TRUE),
+              ),
+              br(),
+              fluidRow(
+                box( width = 4, solidHeader = FALSE, plotlyOutput('county_population')),
+                br(),
+                box( width = 4, solidHeader = FALSE, plotlyOutput('county_number_of_households')),
+                br(),
+                box( width = 4, solidHeader = FALSE, plotlyOutput('county_percent_of_homeowners')),
+                br()
+              ),
+              fluidRow(
+                box(width = 6, solidHeader = TRUE, plotlyOutput('county_single_family_home_price')),
+                br(),
+                 box(width = 6, solidHeader = TRUE, plotlyOutput('county_median_family_income')),
+                br()
+              ),
+              fluidRow(
+                
+                box(width = 6, solidHeader = TRUE, plotlyOutput('county_Br4_rent')),
+                br(),
+                box(width = 6, solidHeader = TRUE, plotlyOutput('county_Br3_rent')),
+                br()
+                
+              ),
+              fluidRow(
+                
+                box(width = 4, solidHeader = TRUE, plotlyOutput('county_average_teacher_salary')),
+                br(),
+                box(width = 4, solidHeader = TRUE, plotlyOutput('county_number_of_school_fte')),
+                br(),
+                box(width = 4, solidHeader = TRUE, plotlyOutput('county_total_school_budget')),
+                br()
+                
+              )
+            ),
       
       ##################################
       #### ---CORRELATION tab ----

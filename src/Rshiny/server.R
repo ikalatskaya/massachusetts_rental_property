@@ -1,6 +1,6 @@
 
 source("global.R")
-
+source("functions.R")
 
 server <- function(input, output, session) {
   
@@ -59,7 +59,7 @@ server <- function(input, output, session) {
     shinydashboard::infoBox(
       "The percent of homeowners in 2011 was ",
       value = home_owner$value,
-      icon = shiny::icon("money-bill"),
+      icon = shiny::icon("house"),
       color = "navy", href = NULL, fill = FALSE
     )
   })
@@ -80,7 +80,8 @@ server <- function(input, output, session) {
     income = data_per_town() %>% filter(cat == "per_capita_income")
     shinydashboard::infoBox(
       "Per capita income in 2019 is ",
-      value = paste(income$value, 12000, sep="\t"),
+      value = income$value,
+      # value = paste(income$value, 12000, sep="\t"),
       icon = shiny::icon("diagram-project"),
       color = "green", href = NULL, fill = FALSE
     )
@@ -121,7 +122,66 @@ server <- function(input, output, session) {
     data_per_town %>% arrange(-year)
   })
   
+  ###############################################################
+  ##### DATA for county
+  ###############################################################
   
+  data_per_county <- reactive({
+    DATA_FULL %>% filter(town != "Boston") %>% tidyr::pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value") %>% dplyr::filter(county %in% !!input$selected_county)
+  })
+  
+  # row1
+  output$county_population <- renderPlotly({
+    y = "2019"
+    plotBox(data_per_county() %>% filter(year == y), x = "population", y="county", "county", pTitle=paste('Population by county in ', y, sep="\t"))
+  })
+  
+  output$county_number_of_households <- renderPlotly({
+    y = "2019"
+    plotBox(data_per_county() %>% filter(year == y), x = "number_of_households", y="county", "county", pTitle = paste('Number of households by county in ', y, sep="\t"))
+  })
+  
+  output$county_percent_of_homeowners <- renderPlotly({
+    y = "2011"
+    plotBox(data_per_county() %>% filter(year == y), x = "percent_of_homeowners", y="county", "county", pTitle = paste('Percent of homeowners by county in ', y, sep="\t"))
+  })
+  #row2
+  output$county_single_family_home_price <- renderPlotly({
+    y = "2019"
+    plotBox(data_per_county() %>% filter(year == y), x = "single_family_home_price", y="county", "county", pTitle = paste('Single family home price by county in ', y, sep="\t"))
+  })
+  
+  output$county_median_family_income <- renderPlotly({
+    y = "2019"
+    plotBox(data_per_county() %>% filter(year == y), x = "median_family_income", y="county", "county", pTitle = paste('Median family income price by county in ', y, sep="\t"))
+  })
+  
+  #row3
+  output$county_Br4_rent <- renderPlotly({
+    y = "2021"
+    plotBox(data_per_county() %>% filter(year == y), x = "Br4_rent", y="county", "county", pTitle = paste('Br4_rent by county in ', y, sep="\t"))
+  })
+  
+  output$county_Br3_rent <- renderPlotly({
+    y = "2021"
+    plotBox(data_per_county() %>% filter(year == y), x = "Br3_rent", y="county", "county", pTitle = paste('Br3_rent by county in ', y, sep="\t"))
+  })
+  
+  # Row4
+  output$county_total_school_budget <- renderPlotly({
+    y = "2019"
+    plotBox(data_per_county() %>% filter(year == y), x = "total_school_budget", y="county", "county", pTitle = paste('Total school budget ', y, sep="\t"))
+  })
+  
+  output$county_average_teacher_salary <- renderPlotly({
+    y = "2019"
+    plotBox(data_per_county() %>% filter(year == y), x = "average_teacher_salary", y="county", "county", pTitle = paste('Average teacher salary ', y, sep="\t"))
+  })
+  
+  output$county_number_of_school_fte <- renderPlotly({
+    y = "2019"
+    plotBox(data_per_county() %>% filter(year == y), x = "number_of_school_fte", y="county", "county", pTitle = paste('Number of school FTE ', y, sep="\t"))
+  })
   
   ###############################################################
   ##### Funnel tab

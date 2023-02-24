@@ -15,6 +15,31 @@ colnames(house_prices_MA) <- c("town", "year", "value", "cat")
 ### rent 
 rent_in_MA_2006_to_2022 <- readRDS("src/data_scraping/data/rent_in_MA_2006_to_2022.rds")
 rent_in_MA_2006_to_2022 = rent_in_MA_2006_to_2022 %>% mutate(cat = paste0(house_type, "_rent")) %>% dplyr::select(-house_type)
+rent_in_MA_2006_to_2022$town = gsub("NewAshford", "New Ashford", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NewBedford", "New Bedford", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NewMarlborough", "New Marlborough", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NewBraintree", "New Braintree", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NewSalem", "New Salem", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NewSalem", "New Salem", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("SouthHadley", "South Hadley", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NorthBrookfield", "North Brookfield", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NorthReading", "North Reading", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NorthAttleborough", "North Attleborough", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NorthAndover", "North Andover", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("NorthAdams", "North Adams", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("EastLongmeadow", "East Longmeadow", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("EastBrookfield", "East Brookfield", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("EastBridgewater", "East Bridgewater", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("GreatBarrington", "Great Barrington", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("MountWashington", "Mount Washington", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("WestStockbridge", "West Stockbridge", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("WestSpringfield", "West Springfield", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("WestNewbury", "West Newbury", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("WestBrookfield", "West Brookfield", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("WestBridgewater", "West Bridgewater", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("WestBoylston", "West Boylston", rent_in_MA_2006_to_2022$town)
+rent_in_MA_2006_to_2022$town = gsub("WestTisbury", "West Tisbury", rent_in_MA_2006_to_2022$town)
+
 
 ### teacher average salary and school budget per school district not per town
 teacher_salary_in_MA_2019 <- readRDS("src/data_scraping/data/teacher_salary_in_MA_2019.rds")
@@ -22,6 +47,7 @@ colnames(teacher_salary_in_MA_2019) <- c("town", "district_code", "total_school_
 teacher_salary_in_MA_2019$year = 2019
 teacher_salary_in_MA_2019 = teacher_salary_in_MA_2019 %>% select(-district_code) %>% pivot_longer(!c("town", "year"), names_to = "cat", values_to = "value")
 teacher_salary_in_MA_2019$year = as.character(teacher_salary_in_MA_2019$year)
+
 
 # average household income per town
 income = readxl::read_excel(path = "src/data_scraping/data/List_of_Massachusetts_locations_by_per_capita_income.xlsx", sheet = 1)

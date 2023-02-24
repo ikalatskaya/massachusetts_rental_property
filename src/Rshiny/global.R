@@ -7,6 +7,7 @@ library(dplyr, warn.conflicts = FALSE)
 library(plotly, warn.conflicts = FALSE)
 library(DT)
 library(ggpubr)
+library(tidyr)
 
 skin = "primary"
 skin_colour = "primary"
