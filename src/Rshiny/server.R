@@ -88,29 +88,45 @@ server <- function(input, output, session) {
   })
   
   output$pricePlot <- renderPlotly({
-    selected_price() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", symbols = c('x'), marker = list(size = 10), colors = c("blue"),
+    D = selected_price()
+    if(nrow(D)==0){
+      return(plotEmptyPlotly("No data for this town is available.", ""))
+    }
+    
+    D %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", symbols = c('x'), marker = list(size = 10), colors = c("blue"),
                                  text = ~paste(" town", town, "\nHouse price", value), hoverinfo=c("text"), 
                                  opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Average property cost in ", as.character(input$townPicker)),
                                                                                   xaxis = list(title = "Time, years"), yaxis = list(title = "House price, $"))
     
   })
   
-
-  
   output$popPlot <- renderPlotly({
-    selected_pop() %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", marker = list(size = 10), colors = c("green")) %>% layout(title = paste0("Population of ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Number of residents"))
+    D = selected_pop()
+    if(nrow(D)==0){
+      return(plotEmptyPlotly("No data for this town is available.", ""))
+    }
+    D %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", marker = list(size = 10), colors = c("green")) %>% layout(title = paste0("Population of ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Number of residents"))
   })
+
   
   ##### Rent plot
   output$rentPlot <- renderPlotly({
-    selected_rent() %>% plot_ly(x = ~year, y=~value, symbol = ~town, color = ~cat, type="scatter",  
+    D = selected_rent()
+    if(nrow(D)==0){
+      return(plotEmptyPlotly("No data for this town is available.", ""))
+    }
+    D %>% plot_ly(x = ~year, y=~value, symbol = ~town, color = ~cat, type="scatter",  
                                 mode="markers+lines", symbols = c('circle','x','o'), 
                                 text = ~paste(" town", town, "\nType", cat, "\nPrice", value), hoverinfo=c("text"), 
                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Rentals in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Price per month, $"))
   })
   
   output$indexPlot <- renderPlotly({
-    selected_index() %>% plot_ly(x = ~year, y= ~index, color = ~town, type="scatter", marker = list(size = 12), mode="markers+lines") %>% layout(title = paste0("Buyer index in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Index"))
+    D = selected_index()
+    if(nrow(D)==0){
+      return(plotEmptyPlotly("No data for this town is available.", ""))
+    }
+    D %>% plot_ly(x = ~year, y= ~index, color = ~town, type="scatter", marker = list(size = 12), mode="markers+lines") %>% layout(title = paste0("Buyer index in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Index"))
   })
   
   ################################

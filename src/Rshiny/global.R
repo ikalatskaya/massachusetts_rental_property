@@ -8,11 +8,13 @@ library(plotly, warn.conflicts = FALSE)
 library(DT)
 library(ggpubr)
 library(tidyr)
+library(shinycssloaders)
 
 skin = "primary"
 skin_colour = "primary"
 status = "primary"  # teal: #39cccc.
 # skin = "lime"
+spinner.colour = "#007bff"
 
 DATA_FULL = qs::qread("./data/merged_data.qs")
 DATA = DATA_FULL %>% filter(!cat %in% c("total_school_budget", "average_teacher_salary", "number_of_school_fte"))

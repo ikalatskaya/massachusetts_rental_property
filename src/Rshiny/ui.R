@@ -44,17 +44,17 @@ ui <- dashboardPage(
                icon = icon("question-circle")
       ),
       
-      sidebarHeader( title = "Data"),
+      sidebarHeader( title = " Data "),
       
       menuItem("Dashboard",
                tabName = "dashboard",
-               icon = icon("table"),
+               icon = icon("columns"), # table
                selected = FALSE
       ),
       
      menuItem("County data",
                tabName = "county",
-               icon = icon("image"),
+               icon = icon("chart-line"),
                selected = FALSE
       ),
       
@@ -67,6 +67,12 @@ ui <- dashboardPage(
       menuItem("Funnel",
                tabName = "filtering",
                icon = icon("filter"),
+               selected = FALSE
+      ),
+
+      menuItem("Linear Regresssion",
+               tabName = "lm",
+               icon = icon("drafting-compass"),
                selected = FALSE
       )
     )
@@ -98,9 +104,7 @@ ui <- dashboardPage(
                    timelineBlock(
                      width = 12,
                      reversed = TRUE,
-                     timelineLabel("Data Sources", color = "olive"),
-                     
-                     
+                     timelineLabel("  Data Sources  ", color = "primary"),
                      timelineItem(
                        title = "Rent information",
                        icon = icon("cog"),
@@ -157,19 +161,48 @@ ui <- dashboardPage(
                        time = "raw data"
                      ),
                      
-                     timelineLabel("Calculations", color = "navy"),
+                     timelineLabel("  Tab functions  ", color = "olive"),
                      timelineItem(
-                       title = "Annutal average rental price",
+                       title = "Dashboard",
+                       icon = icon("columns"),
+                       color = "secondary",
+                       HTML(
+                         "Dashboard tab provides a summary of all above described information in one page per town."
+                       ),
+                       time = "app structure"
+                     ),
+                     timelineItem(
+                       title = "County data",
+                       icon = icon("chart-line"),
+                       color = "secondary",
+                       HTML(
+                         "Here you will find data arranged by MA counties. Data is presented in the form of interactive boxplots (built using plotly) for each data type descripbed above per each county."
+                       ),
+                       time = "app structure"
+                     ),
+                     timelineItem(
+                       title = "Funnel",
+                       color = "secondary",
+                       HTML(
+                         "It is the most interesting tab so far. The app filters all towns in MA based on user's provided specifications, like the size of the town, average house price and index buyer. There is an opportunity to focus your search in the specific counties."
+                       ),
+                       time = "app structure"
+                     ),
+                     
+                     # calculation tabs
+                     timelineLabel(" Added calculations  ", color = "navy"),
+                     timelineItem(
+                       title = "Annual average rental price",
                        icon = icon("info"),
                        color = "secondary",
                        HTML(
-                         "Annual average rental prices were calculated as a mean of studio, one-, two-, three- and four-bedroom houses in each town per each year if data was available."
+                         "Annual average rental prices were calculated as a mean of studio, one-, two-, three- and four-bedroom houses multipled by 12 months in each town per each year if data was available."
                        ),
                        time = "calculation"
                      ),
                      timelineItem(
                        title = "Buyer index",
-                       icon = icon("info"),
+                       icon = icon("shopping-cart"),
                        color = "secondary",
                        HTML(
                          "Buyer index is a ratio between a house price in the specific town and 12-month mean rental. Usually, buyer index between 11 and 17 shows a good balance between house price and income. "
@@ -233,15 +266,14 @@ ui <- dashboardPage(
                        collapsible = TRUE,
                        collapsed = FALSE,
                        status = status,
-                       plotly::plotlyOutput("rentPlot")),
+                       plotly::plotlyOutput("rentPlot") %>% withSpinner(type = 8, color = spinner.colour)),
                    
                    box(title = "Single family home prices",
                        width = 6,
                        collapsible = TRUE,
                        collapsed = FALSE,
                        status = status,
-                       plotly::plotlyOutput("pricePlot"))
-         
+                       plotly::plotlyOutput("pricePlot") %>% withSpinner(type = 8, color = spinner.colour))
         ),
         
         fluidRow(width = 12, 
@@ -250,14 +282,14 @@ ui <- dashboardPage(
                      collapsible = TRUE,
                      collapsed = FALSE,
                      status = status,
-                     plotly::plotlyOutput("indexPlot")),
+                     plotly::plotlyOutput("indexPlot") %>% withSpinner(type = 8, color = spinner.colour)),
                  
                  box(title = "Town population",
                      width = 6,
                      collapsible = TRUE,
                      collapsed = FALSE,
                      status = status,
-                     plotly::plotlyOutput("popPlot"))
+                     plotly::plotlyOutput("popPlot") %>% withSpinner(type = 8, color = spinner.colour))
         ),
          
         
