@@ -1,3 +1,8 @@
+Hey,
+
+I live in Massachusetts and I am looking to buy a rental property here. Massachusetts is one of the most densly populated states in the US, beautiful with a lot of history and a lot of lovely places, best universities in the world, ocean coastline and ~350 towns and cities. 
+
+
 # Massachusetts rental price and property cost visualization
 
 ## INTRODUCTION
