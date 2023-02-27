@@ -58,23 +58,23 @@ ui <- dashboardPage(
                selected = FALSE
       ),
       
-#      menuItem("Correlation",
-#               tabName = "correlation",
-#               icon = icon("image"),
-#               selected = FALSE
-#      ),
+      menuItem("Correlation",
+               tabName = "correlation",
+               icon = icon("image"),
+               selected = FALSE
+      ),
       
       menuItem("Funnel",
                tabName = "filtering",
                icon = icon("filter"),
                selected = FALSE
-      ),
-
-      menuItem("Linear Regresssion",
-               tabName = "lm",
-               icon = icon("drafting-compass"),
-               selected = FALSE
       )
+
+#      menuItem("Linear Regresssion",
+#               tabName = "lm",
+#               icon = icon("drafting-compass"),
+#               selected = FALSE
+#      )
     )
   ),
   
@@ -91,14 +91,21 @@ ui <- dashboardPage(
         tabName = "intro",
         fluidPage(
           status = status,
-          box(width = 12,
-              title = "Application summary",
-              status = status,
-              h5(
-                "This app consolidates Rent prices in different towns and cities in Massachusetts, house prices and other relevant information. 
-                The main objective of the app is to prioritize towns in MA where house price and rent relationship is the most favorable for a potential investor."
-              ),
-              h5("In summary, there are 14 Counties, with 39 cities and 312 towns in Massachusetts. Not all data resources contain information for all towns.")
+          fluidRow(
+            box(width = 4,
+                title = "Application summary",
+                status = status, height = 450,
+                h5(
+                  "This app consolidates Rent prices in different towns and cities in Massachusetts, house prices and other relevant information. 
+                  The main objective of the app is to prioritize towns in MA where house price and rent relationship is the most favorable for a potential investor."
+                ),
+                h5("In summary, there are 14 Counties, with 39 cities and 312 towns in Massachusetts. Not all data resources contain information for all towns.")
+            ),
+            box(width = 8,
+                title = "Massachusetts map", 
+                status = status, height = 450,
+                leafletOutput("map")
+            )
           ),
           fluidRow(width = 12, 
                    timelineBlock(
@@ -231,7 +238,8 @@ ui <- dashboardPage(
                                         options = list(`selected-text-format`= "values", # count, static
                                                         title = "Choose one town of interest", 
                                                         `actions-box` = TRUE, 
-                                                        "max-options" = 3, `multiple-separator` = " | ", 
+                                                        "max-options" = 3, 
+                                                        `multiple-separator` = " | ", 
                                                         "max-options-group" = 3, 
                                                         `live-search`=TRUE,
                                                         "max-options-text" = "No more!")),
@@ -303,49 +311,70 @@ ui <- dashboardPage(
         )
       )
       ),
-      
-      
-      ##################################
-      #### ---COUNTY tab ----
-      ###################################
-      tabItem(tabName = "county",
+      ###########################################
+      #### --- Linear Regression ----
+      ###########################################
+    
+      tabItem(tabName = "lm",
               fluidRow(title = "", width = 12),
               fluidRow(
-                shinyWidgets::pickerInput("selected_county", label = "Choose counties for comparison", 
-                                          choices = counties, selected = counties, multiple = TRUE),
+                box(width = 4, shinyWidgets::pickerInput("lmY", label = "Choose Y variable", 
+                                                         choices = vars, selected = vars[1], multiple = FALSE)),
+                shinyWidgets::pickerInput("lmX", label = "Choose independept X variables for your linear model:", 
+                                          choices = vars, selected = vars[2], multiple = TRUE ),
+                fluidRow(
+                  shinyWidgets::pickerInput("selected_county", label = "Choose counties for modeling", 
+                                            choices = counties, selected = counties, multiple = TRUE),
+                )
+              ),
+              fluidRow(width = 12),
+              fluidRow(width = 12)
+              
+      ),
+      
+      #########################################
+      #### ---COUNTY tab ----
+      #########################################
+      tabItem(tabName = "county",
+              
+              fluidRow(
+                box(width = 10, title = "Choose your favorite counties and click 'plus' sign on rectangles below.", height = 180, solidHeader = TRUE,
+                    selectizeInput("selected_county_v2", label = "Choose counties for visualization and comparison",
+                                   choices = NULL, multiple = TRUE),
+                    br(),
+                    prettyCheckbox(" Should Boston be included? ", status = "primary", width = '100px', inputId = "isBostonIncluded", value = FALSE, inline = FALSE)
+                ),
+                br()
               ),
               br(),
+              
               fluidRow(
-                box( width = 4, solidHeader = FALSE, plotlyOutput('county_population')),
+                box( width = 4, solidHeader = TRUE, plotlyOutput('county_population'), collapsed = TRUE, collapsible = TRUE, title = "POPULALATION"),
                 br(),
-                box( width = 4, solidHeader = FALSE, plotlyOutput('county_number_of_households')),
+                box( width = 4, solidHeader = TRUE, plotlyOutput('county_number_of_households'), collapsed = TRUE, collapsible = TRUE, title = "HOUSEHOLDS"),
                 br(),
-                box( width = 4, solidHeader = FALSE, plotlyOutput('county_percent_of_homeowners')),
+                box( width = 4, solidHeader = TRUE, plotlyOutput('county_percent_of_homeowners'), collapsed = TRUE, collapsible = TRUE, title = "HOMEOWNERS"),
                 br()
               ),
               fluidRow(
-                box(width = 6, solidHeader = TRUE, plotlyOutput('county_single_family_home_price')),
+                box(width = 6, solidHeader = TRUE, plotlyOutput('county_single_family_home_price'), collapsed = TRUE, collapsible = TRUE, title = "HOUSE COST"),
                 br(),
-                 box(width = 6, solidHeader = TRUE, plotlyOutput('county_median_family_income')),
+                box(width = 6, solidHeader = TRUE, plotlyOutput('county_median_family_income'), collapsed = TRUE, collapsible = TRUE, title = "INCOME"),
                 br()
               ),
               fluidRow(
-                
-                box(width = 6, solidHeader = TRUE, plotlyOutput('county_Br4_rent')),
+                box(width = 6, solidHeader = TRUE, plotlyOutput('county_Br4_rent'), collapsed = TRUE, collapsible = TRUE, title = "RENT 4-BR"),
                 br(),
-                box(width = 6, solidHeader = TRUE, plotlyOutput('county_Br3_rent')),
+                box(width = 6, solidHeader = TRUE, plotlyOutput('county_Br3_rent'), collapsed = TRUE, collapsible = TRUE, title = "RENT 3-BR"),
                 br()
-                
               ),
               fluidRow(
-                
-                box(width = 4, solidHeader = TRUE, plotlyOutput('county_average_teacher_salary')),
+                box(width = 4, solidHeader = TRUE, plotlyOutput('county_average_teacher_salary'), collapsed = TRUE, collapsible = TRUE, title = "TEACHERS"),
                 br(),
-                box(width = 4, solidHeader = TRUE, plotlyOutput('county_number_of_school_fte')),
+                box(width = 4, solidHeader = TRUE, plotlyOutput('county_number_of_school_fte'), collapsed = TRUE, collapsible = TRUE, title = "SCHOOL FTE"),
                 br(),
-                box(width = 4, solidHeader = TRUE, plotlyOutput('county_total_school_budget')),
+                box(width = 4, solidHeader = TRUE, plotlyOutput('county_total_school_budget'), collapsed = TRUE, collapsible = TRUE, title = "SCHOOL BUDGET"),
                 br()
-                
               )
             ),
       
@@ -373,9 +402,9 @@ ui <- dashboardPage(
         )
       ),
       
-      ###################################
+      ######################################################
       ### FUNNEL tab
-      ###################################
+      ######################################################
       tabItem(
         tabName = "filtering",
         fluidRow(title = "This simple tool filters towns in MA based on the user's preset attributes.", 
@@ -395,7 +424,6 @@ ui <- dashboardPage(
                                   min = 5, max = 50, step = 1, 
                                   value = c(10, 20)),
               
-              
               shinyWidgets::awesomeRadio("time_year_filter", 
                                   label = "Select year", 
                                   inline = TRUE, 
@@ -403,7 +431,6 @@ ui <- dashboardPage(
                                   choices = years,
                                   checkbox = TRUE,
                                   selected = 2021)
-              
               ),
           
           box(id = "attr_box", title = "Check town based attributes:",
@@ -439,8 +466,6 @@ ui <- dashboardPage(
       ######################################
       tabItem(
         tabName = "app_help",
-        
-        ##### Application help summary box ----
         fluidRow(
           bs4Card(
             status = status,

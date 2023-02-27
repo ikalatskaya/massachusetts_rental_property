@@ -4,6 +4,23 @@ source("functions.R")
 
 server <- function(input, output, session) {
   
+  ##############################################################
+  ##### Intro tab
+  ##############################################################
+  output$map <- renderLeaflet({
+    # m <- leaflet() %>% setView(lng = -71.0589, lat = 42.3601, zoom = 8)
+    # m %>% addTiles()
+    states <- geojsonio::geojson_read("https://rstudio.github.io/leaflet/json/us-states.geojson", what = "sp")
+    # boston is a center
+    # m <- leaflet(states) %>% setView(lng = -71.0589, lat = 42.3601, zoom = 8)
+    m <- leaflet(states) %>% setView(-72.015193, 42.414006,  zoom = 8)
+    # %>%
+    # setView(-96, 37.8, 4) %>%
+    # addProviderTiles("MapBox", options = providerTileOptions(id = "mapbox.light",
+    #  accessToken = Sys.getenv('MAPBOX_ACCESS_TOKEN')))
+    m %>% addPolygons(opacity = 0.3, fillColor = mycolors[1], fill = TRUE, weight = 4, color = mycolors[5]) %>% addTiles()
+  })
+  
   ###############################################################
   ##### Dashboard tab
   ###############################################################
@@ -20,11 +37,12 @@ server <- function(input, output, session) {
     DATA %>% filter(town %in% !!input$townPicker)
   })
   
+  # Dashboard: monthly rent
   selected_rent <- reactive({
-    # monthly rent
     data_per_town() %>% filter(grepl("Br", cat)) %>% dplyr::filter(cat %in% !!input$housetypePicker)
   })
   
+  # Dashboard: single house price
   selected_price <- reactive( {
     data_per_town() %>% filter(cat == "single_family_home_price")
   })
@@ -33,13 +51,13 @@ server <- function(input, output, session) {
     data_per_town() %>% filter(cat == "median_household_income")
   })
   
+  ## Dashboard: Town population:
   selected_pop <- reactive( {
-    ##### Town population:
     data_per_town() %>% filter(cat == "population")
   })
   
+  #####  Dashboard: Ratio between average house and average annual rent
   selected_index <- reactive( {
-    ##### Ratio between average house and average annual rent
     selected_rent() %>% group_by(town, year) %>% dplyr::summarise(median = median(value), .groups = "drop") %>% 
       dplyr::inner_join(selected_price(), by=c('year', 'town')) %>% dplyr::mutate(index = value/(12*median))
   })
@@ -87,50 +105,49 @@ server <- function(input, output, session) {
     )
   })
   
+  # Dashboard: price plot
   output$pricePlot <- renderPlotly({
     D = selected_price()
     if(nrow(D)==0){
       return(plotEmptyPlotly("No data for this town is available.", ""))
     }
-    
-    D %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", symbols = c('x'), marker = list(size = 10), colors = c("blue"),
+    D %>% plot_ly(x = ~year, y=~value, color = ~town, colors = mycolors[1], type="scatter", mode="markers+lines", symbols = c('x'), marker = list(size = 10),
                                  text = ~paste(" town", town, "\nHouse price", value), hoverinfo=c("text"), 
-                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Average property cost in ", as.character(input$townPicker)),
-                                                                                  xaxis = list(title = "Time, years"), yaxis = list(title = "House price, $"))
-    
+                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Average property cost in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "House price, $"))
   })
   
+  # Dashboard: population plot
   output$popPlot <- renderPlotly({
     D = selected_pop()
     if(nrow(D)==0){
       return(plotEmptyPlotly("No data for this town is available.", ""))
     }
-    D %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", marker = list(size = 10), colors = c("green")) %>% layout(title = paste0("Population of ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Number of residents"))
+    D %>% plot_ly(x = ~year, y=~value, color = ~town, type="scatter", mode="markers+lines", marker = list(size = 10), colors = mycolors[2]) %>% layout(title = paste0("Population of ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Number of residents"))
   })
 
-  
-  ##### Rent plot
+  ##### Dashboard: Rent plot
   output$rentPlot <- renderPlotly({
     D = selected_rent()
     if(nrow(D)==0){
       return(plotEmptyPlotly("No data for this town is available.", ""))
     }
-    D %>% plot_ly(x = ~year, y=~value, symbol = ~town, color = ~cat, type="scatter",  
+    D %>% plot_ly(x = ~year, y = ~value, symbol = ~town, color = ~cat, colors = mycolors[3:6], type="scatter",  
                                 mode="markers+lines", symbols = c('circle','x','o'), 
-                                text = ~paste(" town", town, "\nType", cat, "\nPrice", value), hoverinfo=c("text"), 
+                                text = ~paste(" Town", town, "\nType", cat, "\nPrice", value), hoverinfo=c("text"), 
                                 opacity=0.7, marker = list(size = 9)) %>% layout(title = paste0("Rentals in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Price per month, $"))
   })
   
+  ### Dashboard: Index Buyer plot  
   output$indexPlot <- renderPlotly({
     D = selected_index()
     if(nrow(D)==0){
       return(plotEmptyPlotly("No data for this town is available.", ""))
     }
-    D %>% plot_ly(x = ~year, y= ~index, color = ~town, type="scatter", marker = list(size = 12), mode="markers+lines") %>% layout(title = paste0("Buyer index in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Index"))
+    D %>% plot_ly(x = ~year, y= ~index, color = ~town, colors = mycolors[7], type="scatter", marker = list(size = 12), mode="markers+lines") %>% layout(title = paste0("Buyer index in ", as.character(input$townPicker)), xaxis = list(title = "Time, years"), yaxis = list(title = "Index"))
   })
   
-  ################################
-  ##### merge all data together for DT 
+
+  ##### Dashboard: Merge all data together for DT 
   output$indexDT <- renderDataTable({
     rent_wide = selected_rent() %>% tidyr::pivot_wider(id_cols = c("year", "town"), names_from = "cat", values_from = "value")
     data_per_town = selected_index() %>% full_join(rent_wide, by=c("town", "year")) %>% dplyr::select(-median, -cat) %>% dplyr::rename("price" = "value") %>% full_join(selected_pop(), by=c("year", "town")) %>% dplyr::select(-cat) %>% dplyr::rename("population" = "value")
@@ -139,11 +156,36 @@ server <- function(input, output, session) {
   })
   
   ###############################################################
-  ##### DATA for county
+  ##### DATA per county
   ###############################################################
   
+  countyStats <- reactive({
+    temp1 = DATA %>% filter(cat == "population" & year == 2019) %>% group_by(county, year) %>% summarise(population = sum(value), .groups="drop")
+    temp2 = data.frame(county_stats)
+    temp1 %>% full_join(temp2, by="county") %>% dplyr::select(-year, -X)
+  })
+  
+  
+  updateSelectizeInput(session, inputId = "selected_county_v2",
+                       server = TRUE,
+                       choices = county_stats,
+                       selected = c("Middlesex", "Essex" ),
+                       options = list(
+                         valueField = 'county',
+                         labelField = 'county',
+                         searchField = c('county', 'county_seat'),
+                         render = selectize_render_query_function,
+                         placeholder = glue("{nrow(county_stats)} choices")
+                       )
+  )
+  
+  # County: data parsing
   data_per_county <- reactive({
-    DATA_FULL %>% filter(town != "Boston") %>% tidyr::pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value") %>% dplyr::filter(county %in% !!input$selected_county)
+    D = DATA_FULL  %>% tidyr::pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value") %>% dplyr::filter(county %in% !!input$selected_county_v2)
+    if(!input$isBostonIncluded) {
+      D = D %>% filter(town != "Boston")
+    }
+    D
   })
   
   # row1
@@ -223,11 +265,8 @@ server <- function(input, output, session) {
     updateAwesomeRadio(session, inputId = "time_year_filter", choices = years, selected = 2021, inline = TRUE)
   })
 
-  
-
   ## # https://stackoverflow.com/questions/33401788/dplyr-using-mutate-like-rowmeans
   data_selected <- eventReactive(input$Go2, {
-    
     # from initial df parse towns in the specific counties
     selected = DATA  %>% filter(county %in% !!input$county_filter)
     # calculate mean rental prices per town per year from slim_format
@@ -261,7 +300,6 @@ server <- function(input, output, session) {
   ##### correlation tab
   ###############################################################
   
-  
   output$scatter1 <- renderPlot({
     DATA = DATA %>% dplyr::filter(town != "Boston")
     x = DATA %>% dplyr::filter(cat == !!input$varX)
@@ -270,13 +308,11 @@ server <- function(input, output, session) {
     smoothScatter(temp$value.x, temp$value.y, xlab = input$varX, ylab = input$varY)
   })
   
-  ggscatter <- reactive( {
-    
+  ggscatter <- reactive({
     validate( 
       need(input$varX != "", "Please choose variable for X axes."),
       need(input$varY != "", "Please choose variable for Y axes.")
     )
-    
     DATA = DATA %>% dplyr::filter(town != "Boston")
     x = DATA %>% dplyr::filter(cat == !!input$varX)
     y = DATA %>% dplyr::filter(cat == !!input$varY)
