@@ -15,11 +15,17 @@ This app consolidates rent prices in different towns and cities in Massachusetts
 
 https://minijen.shinyapps.io/Rental_property_in_MA/
 
+## Description of the app
+
+<img width="1200" alt="Screenshot 2023-02-27 at 8 10 03 AM" src="https://user-images.githubusercontent.com/20693710/221573294-0882cba6-0a9b-4e2e-a0a6-9c9e9ba42a65.png">
+
+<br/>
+
 ## Dashboard tab
 
 Dashboard tab provides a summary of each (selected by user) town in MA.
 
-<img width="1396" alt="Screen Shot 2022-12-23 at 9 42 44 PM" src="https://user-images.githubusercontent.com/20693710/209418551-a30ad9b8-9a97-4627-8939-c1056ef864b0.png">
+<img width="1200" alt="Screen Shot 2022-12-23 at 9 42 44 PM" src="https://user-images.githubusercontent.com/20693710/209418551-a30ad9b8-9a97-4627-8939-c1056ef864b0.png">
 
 
 ## Funnel tab
