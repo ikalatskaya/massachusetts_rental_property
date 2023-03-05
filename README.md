@@ -39,3 +39,10 @@ In the example below, we wanted to see a list of town in Middlesex county (close
 
 
 Ayer, Shirley, Pepperell and Maynard are getting prioritized. 
+
+
+### Packages to install
+
+install.packages(c("shiny", "shinydashboard", "shinyWidgets", "shinycssloaders","bs4Dash", 
+"stringr", "dplyr", "plotly", "DT", "ggpubr", "tidyr", "RColorBrewer", "leaflet", "glue"))
+
