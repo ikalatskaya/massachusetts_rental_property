@@ -7,7 +7,7 @@ ui <- dashboardPage(
   header = dashboardHeader(
     title = "RENTAL IN MASS",
     status = status,
-    sidebarIcon = shiny::icon("list-alt"),
+    sidebarIcon = shiny::icon("rectangle-list", verify_fa = FALSE),
     skin = skin
   ),
   
@@ -35,44 +35,44 @@ ui <- dashboardPage(
       
       menuItem("Introduction",
                tabName = "intro",
-               icon = icon("info"),
+               icon = icon("info", verify_fa = FALSE),
                selected = TRUE
       ),
       
       menuItem("Help",
                tabName = "app_help",
-               icon = icon("question-circle")
+               icon = icon("question-circle", verify_fa = FALSE)
       ),
       
       sidebarHeader( title = " Data "),
       
       menuItem("Dashboard",
                tabName = "dashboard",
-               icon = icon("columns"), # table
+               icon = icon("columns", verify_fa = FALSE), # table
                selected = FALSE
       ),
       
      menuItem("County data",
                tabName = "county",
-               icon = icon("chart-line"),
+               icon = icon("chart-line", verify_fa = FALSE),
                selected = FALSE
       ),
       
       menuItem("Correlation",
                tabName = "correlation",
-               icon = icon("image"),
+               icon = icon("image", verify_fa = FALSE),
                selected = FALSE
       ),
       
       menuItem("Funnel",
                tabName = "filtering",
-               icon = icon("filter"),
+               icon = icon("filter", verify_fa = FALSE),
                selected = FALSE
       )
 
 #      menuItem("Linear Regresssion",
 #               tabName = "lm",
-#               icon = icon("drafting-compass"),
+#               icon = icon("drafting-compass", verify_fa = FALSE),
 #               selected = FALSE
 #      )
     )
@@ -114,7 +114,7 @@ ui <- dashboardPage(
                      timelineLabel("  Data Sources  ", color = "primary"),
                      timelineItem(
                        title = "Rent information",
-                       icon = icon("cog"),
+                       icon = icon("cog", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Average Fair Market Rent Prices information was scraped from https://www.rentdata.org/states/massachusetts/ from 2006 to 2022. 
@@ -124,7 +124,7 @@ ui <- dashboardPage(
                      ),
                      timelineItem(
                        title = "Population",
-                       icon = icon("sign-out-alt"),
+                       icon = icon("sign-out-alt", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Annual Estimates of the Resident Population: April 1, 2010 to July 1, 2019. 
@@ -134,7 +134,7 @@ ui <- dashboardPage(
                      ),
                      timelineItem(
                        title = "Home prices",
-                       icon = icon("sign-out-alt"),
+                       icon = icon("sign-out-alt", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Home prices in MA were scraped from Boston Magazine web portal: https://www.bostonmagazine.com/property/single-family-home-price-chart-2021/.
@@ -145,7 +145,7 @@ ui <- dashboardPage(
                      ),
                      timelineItem(
                        title = "Percent of housing owner-occupied",
-                       icon = icon("info"),
+                       icon = icon("info", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Data was compiled by the Metropolitan Area Planning Council from American Community Survey data from 05-09.
@@ -157,7 +157,7 @@ ui <- dashboardPage(
                      ),
                      timelineItem(
                        title = "Average income per capita per town",
-                       icon = icon("info"),
+                       icon = icon("info", verify_fa = FALSE),
                        color = "secondary",
                       
                        HTML(
@@ -171,7 +171,7 @@ ui <- dashboardPage(
                      timelineLabel("  Tab functions  ", color = "olive"),
                      timelineItem(
                        title = "Dashboard",
-                       icon = icon("columns"),
+                       icon = icon("columns", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Dashboard tab provides a summary of all above described information in one page per town."
@@ -180,7 +180,7 @@ ui <- dashboardPage(
                      ),
                      timelineItem(
                        title = "County data",
-                       icon = icon("chart-line"),
+                       icon = icon("chart-line", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Here you will find data arranged by MA counties. Data is presented in the form of interactive boxplots (built using plotly) for each data type descripbed above per each county."
@@ -200,7 +200,7 @@ ui <- dashboardPage(
                      timelineLabel(" Added calculations  ", color = "navy"),
                      timelineItem(
                        title = "Annual average rental price",
-                       icon = icon("info"),
+                       icon = icon("info", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Annual average rental prices were calculated as a mean of studio, one-, two-, three- and four-bedroom houses multipled by 12 months in each town per each year if data was available."
@@ -209,7 +209,7 @@ ui <- dashboardPage(
                      ),
                      timelineItem(
                        title = "Buyer index",
-                       icon = icon("shopping-cart"),
+                       icon = icon("shopping-cart", verify_fa = FALSE),
                        color = "secondary",
                        HTML(
                          "Buyer index is a ratio between a house price in the specific town and 12-month mean rental. Usually, buyer index between 11 and 17 shows a good balance between house price and income. "
@@ -227,7 +227,8 @@ ui <- dashboardPage(
       tabItem(
         tabName = "dashboard",
         fluidRow(
-              box(title = "Choose your town/city", width = 6, height = 150,
+              box(title = "Choose your town/city", 
+                    width = 6, height = 150,
                     collapsible = TRUE,
                     collapsed = FALSE,
                     status = status,
@@ -317,20 +318,24 @@ ui <- dashboardPage(
     
       tabItem(tabName = "lm",
               fluidRow(title = "", width = 12),
+              # https://stackoverflow.com/questions/66688910/shinydahsboardplus-how-to-add-box-without-a-title
               fluidRow(
-                box(width = 4, shinyWidgets::pickerInput("lmY", label = "Choose Y variable", 
-                                                         choices = vars, selected = vars[1], multiple = FALSE)),
-                shinyWidgets::pickerInput("lmX", label = "Choose independept X variables for your linear model:", 
-                                          choices = vars, selected = vars[2], multiple = TRUE ),
-                fluidRow(
-                  shinyWidgets::pickerInput("selected_county", label = "Choose counties for modeling", 
-                                            choices = counties, selected = counties, multiple = TRUE),
-                )
+                box(width = 4, id = 'foo', height = 150, title = NULL, headerBorder = FALSE,
+                    shinyWidgets::pickerInput("lmY", label = "Choose Y variable", choices = vars, selected = vars[1], multiple = FALSE)
+                    ),
+                box(width = 4, id = 'foo',  height = 150, title = NULL, headerBorder = FALSE,
+                    shinyWidgets::pickerInput("lmX", label = "Choose independept X variables for your linear model:", choices = vars, selected = vars[2], multiple = TRUE )
+                    ),
+                box(width = 4, id = 'foo', height = 150, title = NULL, headerBorder = FALSE,
+                  shinyWidgets::pickerInput("selected_county", label = "Choose counties for modeling", choices = counties, selected = counties, multiple = TRUE)
+                ),
+                tags$head(tags$style('#foo .box-header{ display: none}'))  # target the box header of foo
               ),
-              fluidRow(width = 12),
-              fluidRow(width = 12)
+              fluidPage(box = 4, plotOutput("residual_plot")),
+              fluidPage(box = 4, plotOutput("residual_plot2"))
               
       ),
+      
       
       #########################################
       #### ---COUNTY tab ----
@@ -349,11 +354,11 @@ ui <- dashboardPage(
               br(),
               
               fluidRow(
-                box( width = 4, solidHeader = TRUE, plotlyOutput('county_population'), collapsed = TRUE, collapsible = TRUE, title = "POPULALATION"),
+                box( width = 4, solidHeader = TRUE, plotlyOutput('county_population'), collapsed = F, collapsible = TRUE, title = "POPULALATION"),
                 br(),
-                box( width = 4, solidHeader = TRUE, plotlyOutput('county_number_of_households'), collapsed = TRUE, collapsible = TRUE, title = "HOUSEHOLDS"),
+                box( width = 4, solidHeader = TRUE, plotlyOutput('county_number_of_households'), collapsed = F, collapsible = TRUE, title = "HOUSEHOLDS"),
                 br(),
-                box( width = 4, solidHeader = TRUE, plotlyOutput('county_percent_of_homeowners'), collapsed = TRUE, collapsible = TRUE, title = "HOMEOWNERS"),
+                box( width = 4, solidHeader = TRUE, plotlyOutput('county_percent_of_homeowners'), collapsed = F, collapsible = TRUE, title = "HOMEOWNERS"),
                 br()
               ),
               fluidRow(
@@ -452,7 +457,7 @@ ui <- dashboardPage(
               br(),
               shinyWidgets::actionBttn(inputId = "Go2", label = "GET LIST", 
                                        color = "primary", style = "bordered",
-                                       icon = icon("pen"))
+                                       icon = icon("pen", verify_fa = FALSE))
         )
         ),
         br(),
@@ -473,7 +478,8 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             collapsible = FALSE,
             boxProfile(
-              image = NULL,
+              # image = "https://www.dropbox.com/s/0cfjt6e8053dbkp/Screenshot%202023-02-27%20at%208.10.20%20PM.png",
+              # image = "https://adminlte.io/themes/AdminLTE/dist/img/user4-128x128.jpg",
               title = "Developer: Irina Kalatskaya, PhD",
               
               subtitle = HTML(

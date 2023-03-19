@@ -1,6 +1,6 @@
 Hey,
 
-I have been living in Massachusetts for five years and I am looking to buy a rental property here. Massachusetts is one of the most densely populated states in the US, beautiful with a lot of history and a lot of lovely places, the best universities in the world, ocean coastline and ~350 towns and cities. So, which town to choose? It is not a trivial question. It should be probably neither too small (only 75 people live in the smallest town in MA) nor Boston (with sky-rocketing prices). It should be with the decent percent of homeowners but not too high, shouldn't?
+I have been living in Massachusetts for five years and right now I am looking to buy a rental property here. Massachusetts is one of the most densely populated states in the US, beautiful with a lot of history and a lot of lovely places, the best universities in the world, ocean coastline and ~350 towns and cities. So, which town to choose? It is not a trivial question. It should be probably neither too small (only 75 people live in the smallest town in MA) nor Boston (with sky-rocketing prices). It should be with the decent percent of homeowners but not too high, shouldn't?
 
 I have scraped, collected, cleaned the data from different resources. Let's see what we have got. 
 

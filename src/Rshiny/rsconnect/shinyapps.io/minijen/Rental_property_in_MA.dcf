@@ -5,10 +5,10 @@ account: minijen
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7554605
-bundleId: 6892433
+bundleId: 6979383
 url: https://minijen.shinyapps.io/Rental_property_in_MA/
-when: 1677501048.98905
-lastSyncTime: 1677501048.98906
+when: 1679258359.87027
+lastSyncTime: 1679258359.87028
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: Funnel_screenshot.png

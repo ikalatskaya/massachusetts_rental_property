@@ -7,18 +7,13 @@ server <- function(input, output, session) {
   ##############################################################
   ##### Intro tab
   ##############################################################
+  # using leaflet library for MA map visualization
   output$map <- renderLeaflet({
-    # m <- leaflet() %>% setView(lng = -71.0589, lat = 42.3601, zoom = 8)
-    # m %>% addTiles()
+    # ? how to slice sp object to the outline only MA on the map??? 
     states <- geojsonio::geojson_read("https://rstudio.github.io/leaflet/json/us-states.geojson", what = "sp")
-    # boston is a center
-    # m <- leaflet(states) %>% setView(lng = -71.0589, lat = 42.3601, zoom = 8)
-    m <- leaflet(states) %>% setView(-72.015193, 42.414006,  zoom = 8)
-    # %>%
-    # setView(-96, 37.8, 4) %>%
-    # addProviderTiles("MapBox", options = providerTileOptions(id = "mapbox.light",
-    #  accessToken = Sys.getenv('MAPBOX_ACCESS_TOKEN')))
-    m %>% addPolygons(opacity = 0.3, fillColor = mycolors[1], fill = TRUE, weight = 4, color = mycolors[5]) %>% addTiles()
+  
+    m <- leaflet(states) %>% setView(-72.015193, 42.414006,  zoom = 8) %>% addProviderTiles(providers$OpenTopoMap)
+    m %>% addPolygons(stroke = FALSE, opacity = 0.3, fillColor = mycolors[1], fill = TRUE, weight = 3, color = "black") 
   })
   
   ###############################################################
@@ -67,7 +62,7 @@ server <- function(input, output, session) {
     shinydashboard::infoBox(
       "The median household income is ",
       value =  income$value,
-      icon = shiny::icon("money-bill"),
+      icon = shiny::icon("money-bill", verify_fa = FALSE),
       color = "navy", href = NULL, fill = FALSE
     )
   })
@@ -77,7 +72,7 @@ server <- function(input, output, session) {
     shinydashboard::infoBox(
       "The percent of homeowners in 2011 was ",
       value = home_owner$value,
-      icon = shiny::icon("house"),
+      icon = shiny::icon("house", verify_fa = FALSE),
       color = "navy", href = NULL, fill = FALSE
     )
   })
@@ -88,7 +83,7 @@ server <- function(input, output, session) {
       "Total Number of Households is ",
       value = income$value,
       # subtitle = " in this town.",
-      icon = shiny::icon("house"),
+      icon = shiny::icon("house", verify_fa = FALSE),
       color = "orange", href = NULL, 
       fill = FALSE
     )
@@ -100,7 +95,7 @@ server <- function(input, output, session) {
       "Per capita income in 2019 is ",
       value = income$value,
       # value = paste(income$value, 12000, sep="\t"),
-      icon = shiny::icon("diagram-project"),
+      icon = shiny::icon("diagram-project", verify_fa = FALSE),
       color = "green", href = NULL, fill = FALSE
     )
   })
@@ -296,6 +291,35 @@ server <- function(input, output, session) {
     options = list(responsive = TRUE), rownames = FALSE)
   
   
+  #############################################################
+  #### Linear Regression
+  #############################################################
+  data_for_modeling <- reactive({
+    percent_of_homeowners = DATA %>% pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value") %>% filter(year == "2011") %>% dplyr::select(town, county, percent_of_homeowners) %>% rename("percent_of_homeowners_2011" = "percent_of_homeowners") 
+    
+    annual_mean_rent_2022 = DATA %>% dplyr::filter(cat %in% c("Br0_rent", "Br1_rent", "Br2_rent", "Br3_rent", "Br4_rent")) %>% dplyr::group_by(town, year, county) %>% dplyr::summarise(annual_mean_rent_2022 = 12*mean(value), .groups = "drop") %>% dplyr::filter(year == "2022") %>% select(-year)
+    
+    family_income_2019 = DATA %>% dplyr::filter(cat %in% c("per_capita_income", "median_family_income", "median_household_income")) %>% pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value") %>% filter(year == "2019") %>% select(-year)
+    
+    town_population_2019 =  DATA %>% dplyr::filter(cat %in% c("population")) %>% pivot_wider(id_cols = c("town", "year", "county"), names_from = "cat", values_from = "value") %>% filter(year == "2019") %>% select(-year) %>%
+      rename("town_population_2019" = "population")
+    
+    family_income_2019 %>% full_join(annual_mean_rent_2022, by=c("town", "county")) %>% full_join(percent_of_homeowners, by=c("town", "county")) %>% full_join(town_population_2019, by = c("town", "county")) %>% na.omit()
+  })
+  
+  # input$lmY
+    model <- reactive({
+      model = lm(data = data_for_modeling(), annual_mean_rent_2022 ~ log10(per_capita_income) + median_family_income + median_household_income + percent_of_homeowners_2011 + town_population_2019)
+    })
+    
+    output$residual_plot <- renderPlot ({
+      plot(model(), which=1)
+    })
+    
+    output$residual_plot2 <- renderPlot ({
+      plot(model(), which=2)
+    })
+    
   ###############################################################
   ##### correlation tab
   ###############################################################
